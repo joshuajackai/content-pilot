@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Pilot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.5.0/mammoth.browser.min.js"></script>
+    <style>
+        /* ============ CONTENT PILOT - DEMAND DESIGNER DESIGN SYSTEM ============ */
+        #cp-wrapper {
+            /* Brand tokens (warm monochrome + glassmorphic orange) */
+            --cp-ink:        #1A1714;   /* warm off-black (no pure #000) */
+            --cp-ink-soft:   #2B2926;
+            --cp-muted:      #6F6A63;
+            --cp-faint:      #9A938A;
+            --cp-line:       rgba(26,23,20,0.10);
+            --cp-line-strong:rgba(26,23,20,0.16);
+
+            --cp-paper:      #FAF6EE;   /* warm off-white (no pure #fff) */
+            --cp-paper-2:    #F2ECE1;
+            --cp-surface:    rgba(255,253,250,0.72);  /* glass card fill */
+            --cp-surface-2:  rgba(255,253,250,0.55);
+            --cp-glass-brd:  rgba(255,255,255,0.65);
+
+            /* Orange gradient accent */
+            --cp-o1: #FFC38A;
+            --cp-o2: #FF8A3D;
+            --cp-o3: #F2541B;
+            --grad-orange:        linear-gradient(135deg, var(--cp-o1) 0%, var(--cp-o2) 52%, var(--cp-o3) 100%);
+            --grad-orange-glass:  linear-gradient(135deg, rgba(255,195,138,0.85) 0%, rgba(255,138,61,0.82) 50%, rgba(242,84,27,0.85) 100%);
+
+            /* Gradient blacks */
+            --grad-black: linear-gradient(155deg, #2C2723 0%, #1A1613 55%, #0F0C0A 100%);
+
+            /* Depth-of-field shadows */
+            --sh-sm:     0 1px 2px rgba(26,23,20,0.06), 0 2px 8px rgba(26,23,20,0.05);
+            --sh-md:     0 10px 30px -12px rgba(26,23,20,0.22), 0 3px 10px -4px rgba(26,23,20,0.10);
+            --sh-lg:     0 30px 70px -24px rgba(26,23,20,0.38), 0 10px 30px -16px rgba(26,23,20,0.22);
+            --sh-orange: 0 16px 34px -10px rgba(242,84,27,0.50), 0 4px 12px -4px rgba(242,84,27,0.35);
+
+            --r-sm: 12px; --r: 18px; --r-lg: 28px; --r-xl: 36px;
+
+            font-family: "ABC Diatype", Inter, sans-serif;
+            color: var(--cp-ink);
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            background:
+                radial-gradient(1100px 620px at 100% -8%, rgba(255,138,61,0.20), transparent 60%),
+                radial-gradient(820px 520px at -8% 112%, rgba(242,84,27,0.12), transparent 55%),
+                linear-gradient(180deg, var(--cp-paper) 0%, var(--cp-paper-2) 100%);
+            background-attachment: fixed;
+        }
+
+        /* Glass panels with depth */
+        .cp-card {
+            background: var(--cp-surface);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--cp-glass-brd);
+            box-shadow: var(--sh-md);
+            border-radius: var(--r-lg);
+            position: relative;
+        }
+        .cp-card::before { /* top sheen for glass depth */
+            content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+            background: linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0) 38%);
+            mix-blend-mode: screen; opacity:.7;
+        }
+        .cp-step {
+            width: 30px; height: 30px; border-radius: 999px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; font-size:13px; color:#FFF7F0;
+            background: var(--grad-orange); box-shadow: var(--sh-orange);
+        }
+        /* Buttons */
+        .cp-btn-primary {
+            background: var(--grad-orange);
+            color:#FFF7F0; font-weight:800; letter-spacing:.04em;
+            border-radius: 999px; box-shadow: var(--sh-orange);
+            position: relative; overflow:hidden; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        }
+        .cp-btn-primary::after { /* glass highlight sweep */
+            content:""; position:absolute; inset:0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.40), rgba(255,255,255,0) 45%);
+            mix-blend-mode: screen;
+        }
+        .cp-btn-primary:hover { transform: translateY(-1px); filter: saturate(108%); box-shadow: 0 22px 44px -10px rgba(242,84,27,0.55); }
+        .cp-btn-primary:active { transform: translateY(0); }
+        .cp-btn-primary:disabled { filter: grayscale(0.4) opacity(0.6); box-shadow:none; cursor:not-allowed; transform:none; }
+
+        .cp-btn-dark {
+            background: var(--grad-black); color:#F5F1EA; font-weight:700;
+            border-radius: 999px; box-shadow: var(--sh-md);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .cp-btn-dark:hover { transform: translateY(-1px); box-shadow: var(--sh-lg); }
+
+        .cp-btn-ghost {
+            background: var(--cp-surface-2); color: var(--cp-ink); font-weight:700;
+            border:1px solid var(--cp-glass-brd); border-radius:999px;
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            transition: background .15s ease, transform .15s ease;
+        }
+        .cp-btn-ghost:hover { background: rgba(255,253,250,0.85); transform: translateY(-1px); }
+
+        .cp-chip {
+            background: var(--cp-surface-2); border:1px solid var(--cp-glass-brd);
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            color: var(--cp-ink-soft); border-radius:999px;
+        }
+        .cp-chip-accent {
+            background: var(--grad-orange-glass); color:#FFF7F0; border:1px solid rgba(255,255,255,0.4);
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            box-shadow: var(--sh-orange);
+        }
+
+        /* Inputs */
+        #cp-wrapper input, #cp-wrapper textarea, #cp-wrapper select {
+            background: rgba(255,253,250,0.7);
+            border: 1px solid var(--cp-line);
+            color: var(--cp-ink);
+            border-radius: var(--r-sm);
+            -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        #cp-wrapper input::placeholder, #cp-wrapper textarea::placeholder { color: var(--cp-faint); }
+        #cp-wrapper input:focus, #cp-wrapper textarea:focus, #cp-wrapper select:focus {
+            outline: none; border-color: var(--cp-o2);
+            box-shadow: 0 0 0 3px rgba(255,138,61,0.22);
+        }
+        #cp-wrapper button:focus-visible, #cp-wrapper a:focus-visible {
+            outline: 2px solid var(--cp-o3); outline-offset: 2px;
+        }
+
+        .cp-tile { background: rgba(255,253,250,0.55); border:1px solid var(--cp-line); border-radius:var(--r-sm); transition: background .15s ease, border-color .15s ease; }
+        .cp-tile:hover { background: rgba(255,253,250,0.85); border-color: var(--cp-line-strong); }
+
+        .sn-spinner { border-top-color:#FFF7F0; animation: sn-spin .8s linear infinite; }
+        @keyframes sn-spin { to { transform: rotate(360deg); } }
+
+        .tab-btn-active   { background: var(--grad-orange); color:#FFF7F0; box-shadow: var(--sh-orange); }
+        .tab-btn-inactive { background: transparent; color: var(--cp-muted); }
+
+        /* Overlays (settings + how-to) */
+        .cp-overlay {
+            position: fixed; inset: 0; z-index: 10000; display: none;
+            align-items: flex-start; justify-content: center; padding: 5vh 1rem;
+            background: rgba(26,23,20,0.45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            overflow-y: auto;
+        }
+        .cp-modal {
+            width: 100%; max-width: 40rem; border-radius: var(--r-xl);
+            background: linear-gradient(180deg, rgba(255,253,250,0.92), rgba(250,246,238,0.92));
+            -webkit-backdrop-filter: blur(28px) saturate(150%); backdrop-filter: blur(28px) saturate(150%);
+            border: 1px solid var(--cp-glass-brd); box-shadow: var(--sh-lg);
+        }
+
+        /* Accordion */
+        .cp-acc-item { border:1px solid var(--cp-line); border-radius: var(--r); overflow:hidden; background: rgba(255,253,250,0.6); }
+        .cp-acc-item + .cp-acc-item { margin-top: 12px; }
+        .cp-acc-head { width:100%; display:flex; align-items:center; gap:14px; padding:16px 18px; text-align:left; cursor:pointer; background:transparent; }
+        .cp-acc-head .cp-acc-num { flex:0 0 auto; }
+        .cp-acc-head h4 { font-weight:800; color: var(--cp-ink); font-size:15px; }
+        .cp-acc-icon { margin-left:auto; flex:0 0 auto; width:24px; height:24px; border-radius:999px; display:flex; align-items:center; justify-content:center; background: var(--cp-surface-2); border:1px solid var(--cp-glass-brd); transition: transform .25s ease; color: var(--cp-o3); font-weight:900; }
+        .cp-acc-item[open] .cp-acc-icon, .cp-acc-item.open .cp-acc-icon { transform: rotate(45deg); }
+        .cp-acc-body { padding: 0 18px 18px 62px; color: var(--cp-ink-soft); font-size:13px; line-height:1.6; }
+
+        .cp-card-out {
+            background: var(--cp-surface);
+            -webkit-backdrop-filter: blur(20px) saturate(140%); backdrop-filter: blur(20px) saturate(140%);
+            border:1px solid var(--cp-glass-brd); box-shadow: var(--sh-lg); border-radius: var(--r-xl);
+        }
+        .chat-bubble { padding:10px 14px; border-radius:14px; margin-bottom:8px; max-width:85%; font-size:.875rem; }
+        .chat-bubble-user { background: var(--grad-orange-glass); color:#FFF7F0; align-self:flex-end; }
+        .chat-bubble-ai { background: rgba(255,253,250,0.85); border:1px solid var(--cp-line); align-self:flex-start; white-space:pre-wrap; color: var(--cp-ink); }
+
+        details > summary { list-style:none; }
+        details > summary::-webkit-details-marker { display:none; }
+        .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    </style>
+</head>
+<body>
+<div id="cp-wrapper">
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-50" style="background: rgba(250,246,238,0.7); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom:1px solid var(--cp-line);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3 flex-wrap">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black" style="background: var(--grad-orange); box-shadow: var(--sh-orange);">CP</div>
+                <div class="leading-none">
+                    <h1 class="text-xl font-black tracking-tight" style="color: var(--cp-ink);">Content Pilot</h1>
+                    <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--cp-faint);">by Demand Designer</span>
+                </div>
+                <span id="active-model-badge" class="ml-0 sm:ml-2 text-[10px] font-black px-2.5 py-1 rounded-full uppercase cp-chip">No Provider</span>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span id="api-alert" class="hidden text-xs font-bold animate-pulse" style="color: var(--cp-o3);">Set API Key</span>
+                <button id="howto-btn" type="button" class="cp-btn-ghost px-4 py-2 text-xs uppercase tracking-wide">How to use</button>
+                <button id="settings-btn" type="button" aria-label="Open settings" title="Settings" class="cp-btn-ghost p-2.5 rounded-full">
+                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+
+            <!-- LEFT COLUMN: INPUTS -->
+            <div class="lg:col-span-4 space-y-8">
+
+                <!-- 01 Source -->
+                <div class="cp-card p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="cp-step">1</span>
+                        <h2 class="text-lg font-extrabold">Provide Content</h2>
+                    </div>
+                    <div class="flex gap-1 p-1 rounded-2xl mb-4" role="tablist" aria-label="Content input method" style="background: rgba(26,23,20,0.05);">
+                        <button data-utype="paste" role="tab" aria-selected="true" type="button" class="u-toggle flex-1 py-2 text-xs font-bold rounded-xl tab-btn-active">Paste</button>
+                        <button data-utype="file" role="tab" aria-selected="false" type="button" class="u-toggle flex-1 py-2 text-xs font-bold rounded-xl tab-btn-inactive">File</button>
+                        <button data-utype="media" role="tab" aria-selected="false" type="button" class="u-toggle flex-1 py-2 text-xs font-bold rounded-xl tab-btn-inactive">URL</button>
+                    </div>
+                    <div id="u-paste">
+                        <label for="transcript-input" class="sr-only">Transcript text</label>
+                        <textarea id="transcript-input" class="w-full h-48 p-4 text-sm outline-none" placeholder="Paste full transcript here..."></textarea>
+                        <p id="char-count" class="mt-1 text-[10px] font-bold text-right uppercase" style="color: var(--cp-faint);" aria-live="polite">0 characters</p>
+                    </div>
+                    <div id="u-file" class="hidden">
+                        <label class="flex flex-col items-center justify-center w-full h-48 rounded-2xl cursor-pointer transition cp-tile" style="border-style:dashed; border-width:2px;">
+                            <span id="file-label" class="text-xs font-bold" style="color: var(--cp-muted);">Select TXT, DOCX, or SRT</span>
+                            <input type="file" id="file-input" class="hidden" accept=".txt,.docx,.srt">
+                        </label>
+                    </div>
+                    <div id="u-media" class="hidden space-y-3">
+                        <label for="media-url" class="sr-only">YouTube or media URL</label>
+                        <input type="url" inputmode="url" id="media-url" class="w-full p-3 text-sm" placeholder="YouTube or Vimeo URL">
+                        <button id="transcribe-btn" type="button" class="cp-btn-dark w-full py-3 text-xs uppercase flex items-center justify-center disabled:opacity-50">
+                            <span id="tr-text">Transcribe via Webhook</span>
+                            <div id="tr-spinner" class="sn-spinner h-4 w-4 ml-2 hidden border-2 border-white/40 rounded-full" aria-hidden="true"></div>
+                        </button>
+                        <p class="text-[10px]" style="color: var(--cp-faint);">Requires a Transcription Webhook (Make/Zapier) set in Settings.</p>
+                    </div>
+                </div>
+                <!-- 02 Brand DNA -->
+                <div class="cp-card p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="cp-step">2</span>
+                        <h2 class="text-lg font-extrabold">Brand Intelligence</h2>
+                    </div>
+                    <div class="mb-4">
+                        <label for="profile-select" class="text-[10px] font-bold uppercase" style="color: var(--cp-faint);">Profile</label>
+                        <div class="flex gap-2 mt-1">
+                            <select id="profile-select" class="flex-1 p-2.5 text-sm"><option value="default">Default Profile</option></select>
+                            <button id="save-profile" type="button" class="cp-btn-ghost px-4 text-xs">Save</button>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="niche-input" class="text-[10px] font-bold uppercase" style="color: var(--cp-faint);">Target Niche</label>
+                            <input type="text" id="niche-input" class="w-full mt-1 p-3 text-sm" placeholder="e.g. AI SaaS Marketing">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <button id="ai-suggest-kw" type="button" class="cp-btn-ghost py-2.5 text-[10px] font-black uppercase disabled:opacity-50">Suggest Keywords</button>
+                            <button id="ai-extract-ent" type="button" class="cp-btn-ghost py-2.5 text-[10px] font-black uppercase disabled:opacity-50">Extract Entities</button>
+                        </div>
+                        <div id="ai-tag-cloud" class="flex flex-wrap gap-1"></div>
+                        <div class="pt-4" style="border-top:1px solid var(--cp-line);">
+                            <label for="brand-url-input" class="text-[10px] font-bold uppercase flex items-center gap-1" style="color: var(--cp-o3);">&#10024; Brand Scraper <span class="text-[8px] font-normal italic" style="color: var(--cp-faint);">(2026 Engine)</span></label>
+                            <div class="flex gap-2 mt-2">
+                                <input type="url" id="brand-url-input" class="flex-1 p-2.5 text-xs" placeholder="https://brand.com/links">
+                                <button id="run-scraper" type="button" class="cp-btn-primary px-4 text-[10px] flex items-center">
+                                    <span id="sc-text">Scrape</span>
+                                    <div id="sc-spinner" class="sn-spinner h-3 w-3 ml-1 hidden border-2 border-white/40 rounded-full" aria-hidden="true"></div>
+                                </button>
+                            </div>
+                            <label for="boilerplate-input" class="sr-only">Brand links and boilerplate</label>
+                            <textarea id="boilerplate-input" class="w-full h-32 p-3 text-xs mt-3 resize-none" placeholder="Paste or scrape your links/CTAs here..."></textarea>
+                            <p class="text-[10px] mt-1" style="color: var(--cp-faint);">Note: scraping uses a public proxy and may be blocked by some sites. Pasting links manually is the reliable path.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- RIGHT COLUMN: GENERATOR & OUTPUTS -->
+            <div class="lg:col-span-8 space-y-8">
+                <div class="cp-card p-6 sm:p-8">
+                    <div class="flex items-center gap-3 mb-8">
+                        <span class="cp-step" style="width:34px;height:34px;">3</span>
+                        <h2 class="text-xl font-black tracking-tight">Synthesis Hub</h2>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="topics_plan" checked><span class="text-xs font-bold">Keyword Plan</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="description" checked><span class="text-xs font-bold">YouTube Hub</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="shownotes"><span class="text-xs font-bold">Podcast Notes</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="titles" checked><span class="text-xs font-bold">SEO Titles</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="learn"><span class="text-xs font-bold">Learning Bullets</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="youtube_tags"><span class="text-xs font-bold">Meta Tags</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="viral_clips"><span class="text-xs font-bold">Viral Clips</span></label>
+                        <label class="flex items-center gap-2 p-3 cp-tile cursor-pointer"><input type="checkbox" class="type-cb accent-orange-500" value="intro_storyboard"><span class="text-xs font-bold">Storyboard</span></label>
+                    </div>
+                    <details class="mb-8 rounded-2xl" style="border:1px solid var(--cp-line);">
+                        <summary class="p-4 text-xs font-bold cursor-pointer flex justify-between items-center" style="color: var(--cp-muted);">
+                            Advanced: Fine-Tune AI Prompt Directives
+                            <svg class="w-4 h-4 transition-transform duration-200" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                        </summary>
+                        <div id="prompt-editors" class="p-6 grid grid-cols-1 gap-6" style="border-top:1px solid var(--cp-line); background: rgba(26,23,20,0.03);"></div>
+                    </details>
+                    <button id="main-generate-btn" type="button" class="cp-btn-primary w-full py-5 flex items-center justify-center gap-3">
+                        <span id="gen-btn-text" class="uppercase tracking-widest">Execute Full Synthesis</span>
+                        <div id="gen-spinner" class="sn-spinner h-6 w-6 hidden border-4 border-white/40 border-t-white rounded-full" aria-hidden="true"></div>
+                    </button>
+                </div>
+                <div id="export-bar" class="hidden flex gap-3 p-4 rounded-3xl" style="background: var(--grad-black); box-shadow: var(--sh-lg);">
+                    <button id="copy-all" type="button" class="flex-1 py-3 text-xs font-black rounded-2xl uppercase" style="background: rgba(255,253,250,0.95); color: var(--cp-ink);">Copy All Assets</button>
+                    <button id="download-txt" type="button" class="flex-1 py-3 text-xs font-black rounded-2xl uppercase" style="background: rgba(255,255,255,0.12); color:#F5F1EA; border:1px solid rgba(255,255,255,0.18);">Download .txt</button>
+                </div>
+                <div id="feed-empty" class="cp-card p-10 text-center">
+                    <p class="text-sm font-extrabold">Your generated assets will appear here</p>
+                    <p class="mt-1 text-xs" style="color: var(--cp-muted);">Add content on the left, choose your asset types, then run the synthesis.</p>
+                </div>
+                <div id="output-feed" class="space-y-8 pb-32"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- HOW TO USE OVERLAY -->
+    <div id="howto-overlay" class="cp-overlay" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+        <div class="cp-modal p-6 sm:p-10">
+            <div class="flex items-center justify-between mb-2">
+                <h3 id="howto-title" class="text-2xl font-black tracking-tight">How to use Content Pilot</h3>
+                <button id="howto-close" type="button" aria-label="Close guide" class="cp-btn-ghost w-9 h-9 rounded-full font-bold">&#10005;</button>
+            </div>
+            <p class="text-xs mb-6" style="color: var(--cp-muted);">Five steps from raw transcript to a full set of ready-to-publish SEO assets.</p>
+            <div id="howto-accordion">
+                <div class="cp-acc-item open">
+                    <button class="cp-acc-head" type="button" aria-expanded="true"><span class="cp-step cp-acc-num">1</span><h4>Connect your AI provider</h4><span class="cp-acc-icon" aria-hidden="true">+</span></button>
+                    <div class="cp-acc-body">Open Settings (the gear, top right). Choose your Content Engine (GPT-5.5, Claude Sonnet 4.6, or Gemini 3.5 Flash), paste your API key, and press Authorize System. Your key is stored only in this browser. For shared or public use, route calls through a server-side proxy.</div>
+                </div>
+                <div class="cp-acc-item">
+                    <button class="cp-acc-head" type="button" aria-expanded="false"><span class="cp-step cp-acc-num">2</span><h4>Provide your content</h4><span class="cp-acc-icon" aria-hidden="true">+</span></button>
+                    <div class="cp-acc-body" hidden>Use the Paste tab for a transcript, the File tab to upload TXT, DOCX, or SRT, or the URL tab to pull a YouTube or Vimeo link. URL transcription needs a transcription webhook set in Settings.</div>
+                </div>
+                <div class="cp-acc-item">
+                    <button class="cp-acc-head" type="button" aria-expanded="false"><span class="cp-step cp-acc-num">3</span><h4>Set your brand intelligence</h4><span class="cp-acc-icon" aria-hidden="true">+</span></button>
+                    <div class="cp-acc-body" hidden>Enter your target niche, then paste your links and CTAs into the boilerplate box (or use the Brand Scraper to pull them from a URL). Suggest Keywords and Extract Entities add SEO context the AI will weave into every asset.</div>
+                </div>
+                <div class="cp-acc-item">
+                    <button class="cp-acc-head" type="button" aria-expanded="false"><span class="cp-step cp-acc-num">4</span><h4>Choose your assets and run</h4><span class="cp-acc-icon" aria-hidden="true">+</span></button>
+                    <div class="cp-acc-body" hidden>Tick the asset types you want (Keyword Plan, YouTube Hub, SEO Titles, Viral Clips, Storyboard, and more). Optionally fine-tune the AI directives in the Advanced panel, then press Execute Full Synthesis. Each asset appears as its own card.</div>
+                </div>
+                <div class="cp-acc-item">
+                    <button class="cp-acc-head" type="button" aria-expanded="false"><span class="cp-step cp-acc-num">5</span><h4>Refine, copy, and export</h4><span class="cp-acc-icon" aria-hidden="true">+</span></button>
+                    <div class="cp-acc-body" hidden>Use Refine on any card to adjust it in a quick chat (for example, "make it shorter" or "punchier hook"). Then Copy Asset per card, Copy All Assets, or Download .txt to take everything with you.</div>
+                </div>
+            </div>
+            <button id="howto-done" type="button" class="cp-btn-primary w-full py-4 mt-7 uppercase tracking-widest">Got it</button>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal-overlay" class="cp-overlay" role="dialog" aria-modal="true" aria-labelledby="sys-core-title">
+        <div class="cp-modal p-6 sm:p-10">
+            <div class="flex items-center justify-between mb-8">
+                <h3 id="sys-core-title" class="text-2xl font-black uppercase tracking-tight">System Core</h3>
+                <button id="close-modal" type="button" aria-label="Close settings" class="cp-btn-ghost w-9 h-9 rounded-full font-bold">&#10005;</button>
+            </div>
+            <div class="space-y-8">
+                <div class="p-4 rounded-2xl text-[11px] leading-relaxed" style="background: rgba(242,84,27,0.08); border:1px solid rgba(242,84,27,0.25); color: var(--cp-ink-soft);">
+                    <p class="font-black uppercase tracking-wide mb-1" style="color: var(--cp-o3);">Before you paste a key</p>
+                    <p>Keys are stored in <strong>this browser only</strong> and are sent directly to the provider from the browser. Anyone with access to this device can read them, and some providers may block browser calls (CORS). For shared or public use, route requests through a server-side proxy and use keys with spend limits.</p>
+                </div>
+                <section>
+                    <h4 class="text-[10px] font-black uppercase tracking-widest mb-4" style="color: var(--cp-faint);">Current Frontier Models (June 2026)</h4>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="llm-provider" class="text-xs font-bold block mb-1">Content Engine</label>
+                            <select id="llm-provider" class="w-full p-3 text-sm font-bold">
+                                <option value="openai">OpenAI GPT-5.5</option>
+                                <option value="anthropic">Claude Sonnet 4.6</option>
+                                <option value="gemini">Google Gemini 3.5 Flash</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="api-key-main" class="sr-only">AI provider API key</label>
+                            <input type="password" id="api-key-main" autocomplete="off" class="w-full p-3 text-sm" placeholder="AI Provider Key (sk-...)">
+                        </div>
+                    </div>
+                </section>
+                <section class="pt-6" style="border-top:1px solid var(--cp-line);">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest mb-4" style="color: var(--cp-faint);">Transcription System</h4>
+                    <div class="space-y-4">
+                        <label for="trans-provider" class="sr-only">Transcription provider</label>
+                        <select id="trans-provider" class="w-full p-3 text-sm font-bold">
+                            <option value="none">Manual Mode</option>
+                            <option value="whisper">OpenAI Whisper</option>
+                            <option value="deepgram">Deepgram</option>
+                            <option value="assemblyai">AssemblyAI</option>
+                        </select>
+                        <label for="webhook-trans" class="sr-only">Transcription webhook URL</label>
+                        <input type="text" id="webhook-trans" class="w-full p-3 text-sm" placeholder="Transcription Webhook (Make/Zapier)">
+                    </div>
+                </section>
+                <section class="pt-6" style="border-top:1px solid var(--cp-line);">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest mb-4" style="color: var(--cp-faint);">Automation Targets</h4>
+                    <div class="space-y-3">
+                        <label for="webhook-zapier" class="sr-only">Zapier endpoint</label>
+                        <input type="text" id="webhook-zapier" class="w-full p-3 text-xs" placeholder="Zapier Endpoint">
+                        <label for="webhook-make" class="sr-only">Make.com endpoint</label>
+                        <input type="text" id="webhook-make" class="w-full p-3 text-xs" placeholder="Make.com Endpoint">
+                    </div>
+                </section>
+                <button id="save-config" type="button" class="cp-btn-dark w-full py-5 uppercase tracking-widest">Authorize System</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div id="toast" role="status" aria-live="polite" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 text-[10px] font-black uppercase tracking-widest rounded-full opacity-0 translate-y-20 transition-all z-[20000]" style="background: var(--grad-black); color:#F5F1EA; box-shadow: var(--sh-lg);">
+        <span id="toast-text">Synchronizing...</span>
+    </div>
+</div>
+<script>
+/**
+ * CONTENT PILOT - by Demand Designer
+ */
+(function() {
+    // ─── STATE REGISTRY ───
+    const state = {
+        transcript: '',
+        llmProvider: 'openai',
+        apiKeys: { openai: '', anthropic: '', gemini: '' },
+        webhooks: { transcription: '', zapier: '', make: '' },
+        transcriptionProvider: 'none',
+        brand: { niche: '', boilerplate: '', keywords: [], entities: [] },
+        profiles: {},
+        chatHistories: {},
+        customPrompts: {
+            topics_plan: "Synthesize a Topic & Keyword Map. Identify 2026-intent clusters, semantic relevance, and long-tail autocompletion simulations.",
+            description: "Craft a high-converting YouTube Hub description. Include hooks, timestamps, and brand CTA logic. No Markdown.",
+            shownotes: "Draft structured Podcast Notes for a Google Doc format. Focus on flow, quotes, and resource stacks.",
+            titles: "Generate 10 High-CTR Titles using 2026 cognitive psychological triggers (Curiosity Gaps + Benefit Loops).",
+            learn: "Generate a 'What You'll Learn' value stack using bulleted emotional benefits.",
+            youtube_tags: "Output 20 primary semantic tags, comma-separated, single line only.",
+            viral_clips: "JSON ONLY: Identify high-retention segments. Return structure: { 'clips': [{ 'timestamp': '...', 'hook': '...', 'transcript': '...' }] }",
+            intro_storyboard: "Produce a 6-stage video intro storyboard. Shock hooks, authority stacks, and cliffhanger loops."
+        }
+    };
+    // Models refreshed June 2026. Slugs drift, so confirm against each provider's docs before launch.
+    const MODEL_MAP = { openai: 'gpt-5.5', anthropic: 'claude-sonnet-4-6', gemini: 'gemini-3.5-flash' };
+    const PROVIDER_LABEL = { openai: 'GPT-5.5', anthropic: 'Claude Sonnet 4.6', gemini: 'Gemini 3.5 Flash' };
+
+    // ─── UTILS ───
+    const $ = (id) => document.getElementById(id);
+    const notify = (msg, err = false) => {
+        const t = $('toast');
+        $('toast-text').textContent = msg;
+        t.style.background = err ? 'linear-gradient(155deg,#F2541B,#B5340C)' : 'var(--grad-black)';
+        t.classList.replace('opacity-0', 'opacity-100');
+        t.classList.replace('translate-y-20', 'translate-y-0');
+        setTimeout(() => {
+            t.classList.replace('opacity-100', 'opacity-0');
+            t.classList.replace('translate-y-0', 'translate-y-20');
+        }, 3000);
+    };
+    const updateBadge = () => {
+        const key = state.apiKeys[state.llmProvider];
+        $('api-alert').classList.toggle('hidden', !!key);
+        $('active-model-badge').textContent = (PROVIDER_LABEL[state.llmProvider] || state.llmProvider) + ' Ready';
+    };
+    const updateCharCount = () => {
+        const n = ($('transcript-input').value || '').length;
+        $('char-count').textContent = n.toLocaleString() + ' character' + (n === 1 ? '' : 's');
+    };
+    const isValidVideoUrl = (value) => {
+        try {
+            const u = new URL(value);
+            const host = u.hostname.replace(/^www\./, '');
+            return /(^|\.)youtube\.com$/.test(host) || host === 'youtu.be' || /(^|\.)vimeo\.com$/.test(host);
+        } catch { return false; }
+    };
+    // ─── AI CORE ───
+    async function callAI(prompt, isJson = false, history = []) {
+        const provider = state.llmProvider;
+        const key = state.apiKeys[provider];
+        if(!key) { notify("Set your API Key first", true); return null; }
+        let url, body, headers = { 'Content-Type': 'application/json' };
+        const model = MODEL_MAP[provider];
+        try {
+            if (provider === 'openai') {
+                url = 'https://api.openai.com/v1/chat/completions';
+                headers['Authorization'] = `Bearer ${key}`;
+                body = { model, messages: [...history, { role: 'user', content: prompt }] };
+                if (isJson) body.response_format = { type: 'json_object' };
+            } else if (provider === 'anthropic') {
+                url = 'https://api.anthropic.com/v1/messages';
+                headers['x-api-key'] = key;
+                headers['anthropic-version'] = '2023-06-01';
+                headers['anthropic-dangerous-direct-browser-access'] = 'true';
+                body = { model, max_tokens: 4000, messages: [...history, { role: 'user', content: isJson ? `${prompt}\n\nIMPORTANT: Respond ONLY with a valid JSON object.` : prompt }] };
+            } else if (provider === 'gemini') {
+                url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                const contents = [...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: h.content }] })), { role: 'user', parts: [{ text: prompt }] }];
+                body = { contents };
+                if (isJson) body.generationConfig = { responseMimeType: 'application/json' };
+            }
+            const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+            if (!res.ok) {
+                const errText = await res.text();
+                let msg;
+                try { msg = JSON.parse(errText).error?.message || errText; } catch { msg = `${res.status} ${res.statusText}`; }
+                notify(`API error: ${String(msg).slice(0, 80)}`, true);
+                console.error('API error:', errText);
+                return null;
+            }
+            const data = await res.json();
+            let text;
+            if (provider === 'openai') text = data.choices?.[0]?.message?.content;
+            else if (provider === 'anthropic') text = data.content?.[0]?.text;
+            else if (provider === 'gemini') text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) { notify("No content returned by the model", true); return null; }
+            if (isJson) {
+                const start = text.indexOf('{');
+                const end = text.lastIndexOf('}');
+                if (start === -1 || end === -1) { notify("Could not parse AI JSON", true); return null; }
+                try { return JSON.parse(text.slice(start, end + 1)); }
+                catch (e) { notify("Could not parse AI JSON", true); console.error('JSON parse error:', e, text); return null; }
+            }
+            return text;
+        } catch (e) {
+            console.error(e);
+            notify("Network/CORS error. Try another provider or a server-side proxy.", true);
+            return null;
+        }
+    }
+    // ─── INIT ───
+    const init = () => {
+        const editorContainer = $('prompt-editors');
+        Object.keys(state.customPrompts).forEach(type => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <label for="pe-${type}" class="text-[10px] font-black uppercase ml-1" style="color: var(--cp-faint);">${type.replace(/_/g,' ')} Directives</label>
+                <textarea id="pe-${type}" class="w-full mt-2 p-3 text-xs h-24">${state.customPrompts[type]}</textarea>
+            `;
+            editorContainer.appendChild(div);
+        });
+        try {
+            const saved = localStorage.getItem('content-pilot-config') || localStorage.getItem('sn-seo-config');
+            if(saved) {
+                const s = JSON.parse(saved);
+                Object.assign(state, s);
+                Object.keys(state.customPrompts).forEach(type => { const ta = $('pe-' + type); if (ta) ta.value = state.customPrompts[type]; });
+                $('api-key-main').value = state.apiKeys[state.llmProvider] || '';
+                $('llm-provider').value = state.llmProvider;
+                $('webhook-trans').value = state.webhooks.transcription || '';
+                $('webhook-zapier').value = state.webhooks.zapier || '';
+                $('webhook-make').value = state.webhooks.make || '';
+                if (state.transcriptionProvider) $('trans-provider').value = state.transcriptionProvider;
+                $('niche-input').value = state.brand?.niche || '';
+                $('boilerplate-input').value = state.brand?.boilerplate || '';
+            }
+        } catch (e) { console.error('config load error', e); }
+        updateBadge();
+        updateCharCount();
+        updateActionStates();
+    };
+    const updateActionStates = () => {
+        const hasT = !!$('transcript-input').value.trim();
+        $('main-generate-btn').disabled = !hasT;
+        $('ai-suggest-kw').disabled = !hasT;
+        $('ai-extract-ent').disabled = !hasT;
+    };
+    // ─── INPUT TABS ───
+    document.querySelectorAll('.u-toggle').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.u-toggle').forEach(b => {
+                const active = b === btn;
+                b.classList.toggle('tab-btn-active', active);
+                b.classList.toggle('tab-btn-inactive', !active);
+                b.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            const type = btn.dataset.utype;
+            $('u-paste').classList.toggle('hidden', type !== 'paste');
+            $('u-file').classList.toggle('hidden', type !== 'file');
+            $('u-media').classList.toggle('hidden', type !== 'media');
+        };
+    });
+    $('transcript-input').addEventListener('input', () => { state.transcript = $('transcript-input').value; updateCharCount(); updateActionStates(); });
+    // ─── FILE INPUT ───
+    $('file-input').onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        $('file-label').textContent = file.name;
+        const apply = (txt) => { state.transcript = txt; $('transcript-input').value = txt; updateCharCount(); updateActionStates(); };
+        const reader = new FileReader();
+        if(file.name.toLowerCase().endsWith('.docx')) {
+            reader.onload = (e) => {
+                mammoth.extractRawText({ arrayBuffer: e.target.result })
+                    .then(r => { apply(r.value); notify("DOCX Loaded", false); })
+                    .catch(() => notify("Could not parse DOCX", true));
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.onload = (e) => {
+                let text = e.target.result;
+                if (file.name.toLowerCase().endsWith('.srt')) {
+                    text = text.replace(/^\d+\s*$/gm, '').replace(/\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}/g, '').replace(/<[^>]*>/g, '').replace(/^[ \t]*[\r\n]+/gm, '').trim();
+                }
+                apply(text); notify("File Loaded", false);
+            };
+            reader.readAsText(file);
+        }
+    };
+    // ─── TRANSCRIBE (validate + webhook) ───
+    $('transcribe-btn').onclick = async () => {
+        const url = $('media-url').value.trim();
+        if (!url) return notify("Paste a video URL first", true);
+        if (!isValidVideoUrl(url)) return notify("Enter a valid YouTube or Vimeo URL", true);
+        if (!state.webhooks.transcription) return notify("Set a Transcription Webhook in Settings", true);
+        $('transcribe-btn').disabled = true;
+        $('tr-text').classList.add('hidden');
+        $('tr-spinner').classList.remove('hidden');
+        try {
+            const res = await fetch(state.webhooks.transcription, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, provider: state.transcriptionProvider })
+            });
+            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+            const data = await res.json();
+            if (!data.transcript) throw new Error("Webhook response missing 'transcript'");
+            state.transcript = data.transcript;
+            $('transcript-input').value = data.transcript;
+            updateCharCount(); updateActionStates();
+            notify("Transcription complete", false);
+        } catch (e) {
+            notify("Transcription failed: " + e.message, true);
+        } finally {
+            $('transcribe-btn').disabled = false;
+            $('tr-text').classList.remove('hidden');
+            $('tr-spinner').classList.add('hidden');
+        }
+    };
+    // ─── BRAND SCRAPER ───
+    $('run-scraper').onclick = async () => {
+        const url = $('brand-url-input').value;
+        if(!url) return notify("URL Required", true);
+        $('sc-text').classList.add('hidden');
+        $('sc-spinner').classList.remove('hidden');
+        try {
+            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const res = await fetch(proxy);
+            const json = await res.json();
+            const text = json.contents.replace(/<[^>]*>/g, ' ').substring(0, 10000);
+            const prompt = `System: Scrape Brand DNA. Extract social handles, website links, promo codes, and boilerplate closing text from this data: ${text}`;
+            const result = await callAI(prompt);
+            if(result) { $('boilerplate-input').value = result; state.brand.boilerplate = result; notify("DNA Scraped!", false); }
+        } catch (e) { notify("Scraper blocked (CORS or bot shield)", true); }
+        $('sc-text').classList.remove('hidden');
+        $('sc-spinner').classList.add('hidden');
+    };
+    // ─── KEYWORDS / ENTITIES ───
+    $('ai-suggest-kw').onclick = async () => {
+        const t = $('transcript-input').value;
+        if(!t) return notify("Provide content first", true);
+        const res = await callAI(`Identify the top 10 long-tail SEO keywords for this transcript. Return a short comma-separated line. Transcript: ${t.substring(0, 8000)}`);
+        if(res) { const tag = document.createElement('div'); tag.className = "cp-chip px-2.5 py-1.5 text-[10px] font-bold"; tag.textContent = res; $('ai-tag-cloud').appendChild(tag); }
+    };
+    $('ai-extract-ent').onclick = async () => {
+        const t = $('transcript-input').value;
+        if(!t) return notify("Provide content first", true);
+        const res = await callAI(`Extract the key named entities (people, organizations, products) from this transcript. Return a short comma-separated line. Transcript: ${t.substring(0, 8000)}`);
+        if(res) { const tag = document.createElement('div'); tag.className = "cp-chip-accent px-2.5 py-1.5 text-[10px] font-bold"; tag.textContent = res; $('ai-tag-cloud').appendChild(tag); }
+    };
+    // ─── MAIN GENERATOR ───
+    $('main-generate-btn').onclick = async () => {
+        state.transcript = $('transcript-input').value;
+        if(!state.transcript) return notify("Source Content Missing", true);
+        const tasks = Array.from(document.querySelectorAll('.type-cb:checked')).map(cb => cb.value);
+        if(!tasks.length) return notify("Select at least one asset type", true);
+        $('main-generate-btn').disabled = true;
+        $('gen-btn-text').classList.add('hidden');
+        $('gen-spinner').classList.remove('hidden');
+        $('output-feed').innerHTML = '';
+        $('feed-empty').classList.add('hidden');
+        let produced = 0;
+        for (let type of tasks) {
+            const prompt = `
+                Expert Synthesizer Persona Active.
+                Niche: ${$('niche-input').value}
+                Brand DNA: ${$('boilerplate-input').value}
+                Directives: ${$('pe-' + type).value}
+                Source: ${state.transcript.substring(0, 12000)}
+            `;
+            const result = await callAI(prompt, type === 'viral_clips');
+            if(result) {
+                produced++;
+                const card = document.createElement('div');
+                card.className = "cp-card-out p-6 sm:p-8";
+                card.dataset.type = type;
+                let contentHTML = '';
+                if(type === 'viral_clips' && result.clips) {
+                    result.clips.forEach(c => {
+                        contentHTML += `<div class="mb-4 p-4 rounded-2xl" style="background: rgba(242,84,27,0.06); border:1px solid rgba(242,84,27,0.18);">
+                            <p class="text-[10px] font-black uppercase tracking-widest" style="color: var(--cp-o3);">${c.timestamp || 'Clip'}</p>
+                            <p class="text-sm font-bold mt-1" style="color: var(--cp-ink);">${c.hook || ''}</p>
+                            <textarea class="w-full mt-2 p-2 text-[10px] rounded-lg" rows="3" readonly aria-label="Clip transcript">${c.transcript || ''}</textarea>
+                        </div>`;
+                    });
+                } else if (type === 'viral_clips') {
+                    contentHTML = `<textarea class="w-full h-80 p-6 rounded-3xl text-sm leading-relaxed" readonly aria-label="Raw output">${typeof result === 'string' ? result : JSON.stringify(result, null, 2)}</textarea>`;
+                } else {
+                    contentHTML = `<textarea class="w-full h-80 p-6 rounded-3xl text-sm leading-relaxed" aria-label="${type.replace(/_/g,' ')} output">${result}</textarea>`;
+                }
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-6 gap-2 flex-wrap">
+                        <span class="cp-chip-accent text-xs font-black uppercase px-3 py-1.5">${type.replace(/_/g,' ')}</span>
+                        <div class="flex gap-2">
+                            <button type="button" class="refine-trigger cp-btn-ghost px-3 py-1.5 text-[10px] font-black uppercase">Refine</button>
+                            <button type="button" class="copy-trigger cp-btn-dark px-3 py-1.5 text-[10px] font-black uppercase">Copy Asset</button>
+                        </div>
+                    </div>
+                    ${contentHTML}
+                    <div class="refine-module hidden mt-6 pt-6" style="border-top:1px solid var(--cp-line);">
+                        <div class="refine-history flex flex-col gap-2 mb-4"></div>
+                        <div class="flex gap-2">
+                            <input type="text" aria-label="Refinement instruction" class="refine-input flex-1 p-3 text-xs" placeholder="e.g. 'Make it shorter' or 'Punchier hook'">
+                            <button type="button" class="refine-send-btn cp-btn-primary px-4 py-2 text-xs">Send</button>
+                        </div>
+                    </div>
+                `;
+                card.querySelector('.copy-trigger').onclick = (e) => {
+                    const ta = card.querySelector('textarea');
+                    if (ta) navigator.clipboard.writeText(ta.value);
+                    e.target.textContent = "COPIED!";
+                    setTimeout(() => e.target.textContent = "COPY ASSET", 2000);
+                };
+                card.querySelector('.refine-trigger').onclick = () => { card.querySelector('.refine-module').classList.toggle('hidden'); };
+                const sendBtn = card.querySelector('.refine-send-btn');
+                const chatInput = card.querySelector('.refine-input');
+                const historyBox = card.querySelector('.refine-history');
+                sendBtn.onclick = async () => {
+                    const msg = chatInput.value.trim();
+                    if(!msg) return;
+                    const ub = document.createElement('div'); ub.className = "chat-bubble chat-bubble-user"; ub.textContent = msg; historyBox.appendChild(ub);
+                    chatInput.value = ''; sendBtn.disabled = true;
+                    const ta = card.querySelector('textarea');
+                    const currentVal = ta ? ta.value : '';
+                    const res = await callAI(`The user wants to refine this generated content: "${currentVal}". Refinement instructions: "${msg}"`);
+                    if(res) { const ab = document.createElement('div'); ab.className = "chat-bubble chat-bubble-ai"; ab.textContent = res; historyBox.appendChild(ab); if (ta) ta.value = res; }
+                    sendBtn.disabled = false;
+                };
+                $('output-feed').prepend(card);
+            }
+        }
+        if (produced === 0) {
+            $('feed-empty').classList.remove('hidden');
+            $('feed-empty').innerHTML = `<p class="text-sm font-extrabold" style="color: var(--cp-o3);">Nothing was generated</p><p class="mt-1 text-xs" style="color: var(--cp-muted);">The provider returned no usable content. Check your API key and provider in Settings, then try again.</p>`;
+            $('export-bar').classList.add('hidden');
+        } else {
+            $('export-bar').classList.remove('hidden');
+            notify("Synthesis Complete", false);
+        }
+        $('main-generate-btn').disabled = false;
+        $('gen-btn-text').classList.remove('hidden');
+        $('gen-spinner').classList.add('hidden');
+        updateActionStates();
+    };
+    // ─── OVERLAY HELPERS (Escape + outside-click + focus return) ───
+    let lastFocused = null;
+    const openOverlay = (id) => {
+        lastFocused = document.activeElement;
+        $(id).style.display = 'flex';
+        const f = $(id).querySelector('select, input, button');
+        if (f) f.focus();
+    };
+    const closeOverlay = (id) => {
+        $(id).style.display = 'none';
+        if (lastFocused && lastFocused.focus) lastFocused.focus();
+    };
+    $('settings-btn').onclick = () => openOverlay('settings-modal-overlay');
+    $('close-modal').onclick = () => closeOverlay('settings-modal-overlay');
+    $('howto-btn').onclick = () => openOverlay('howto-overlay');
+    $('howto-close').onclick = () => closeOverlay('howto-overlay');
+    $('howto-done').onclick = () => closeOverlay('howto-overlay');
+    ['settings-modal-overlay','howto-overlay'].forEach(id => {
+        $(id).addEventListener('mousedown', (e) => { if (e.target === $(id)) closeOverlay(id); });
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        ['settings-modal-overlay','howto-overlay'].forEach(id => { if ($(id).style.display === 'flex') closeOverlay(id); });
+    });
+    // ─── ACCORDION ───
+    $('howto-accordion').addEventListener('click', (e) => {
+        const head = e.target.closest('.cp-acc-head');
+        if (!head) return;
+        const item = head.parentElement;
+        const body = item.querySelector('.cp-acc-body');
+        const isOpen = item.classList.toggle('open');
+        head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (body) body.hidden = !isOpen;
+    });
+    // ─── SETTINGS SAVE ───
+    $('llm-provider').onchange = () => { $('api-key-main').value = state.apiKeys[$('llm-provider').value] || ''; };
+    $('save-config').onclick = () => {
+        state.llmProvider = $('llm-provider').value;
+        state.apiKeys[state.llmProvider] = $('api-key-main').value;
+        state.transcriptionProvider = $('trans-provider').value;
+        state.webhooks.transcription = $('webhook-trans').value;
+        state.webhooks.zapier = $('webhook-zapier').value;
+        state.webhooks.make = $('webhook-make').value;
+        state.brand.niche = $('niche-input').value;
+        state.brand.boilerplate = $('boilerplate-input').value;
+        localStorage.setItem('content-pilot-config', JSON.stringify(state));
+        updateBadge();
+        closeOverlay('settings-modal-overlay');
+        notify("System Authorized");
+    };
+    // ─── EXPORTS ───
+    $('copy-all').onclick = () => {
+        let fullText = "";
+        document.querySelectorAll('#output-feed textarea').forEach(ta => { fullText += ta.value + "\n\n--- NEXT ASSET ---\n\n"; });
+        navigator.clipboard.writeText(fullText);
+        notify("Full Bundle Copied");
+    };
+    $('download-txt').onclick = () => {
+        let fullText = "";
+        document.querySelectorAll('#output-feed > div').forEach(card => {
+            const label = card.querySelector('span')?.textContent || 'ASSET';
+            const ta = card.querySelector('textarea');
+            if (ta) fullText += `--- ${label.toUpperCase()} ---\n\n${ta.value}\n\n\n`;
+        });
+        if (!fullText) return notify("Nothing to download yet", true);
+        const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'content-pilot-export.txt';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+        notify("Downloaded .txt", false);
+    };
+    init();
+})();
+</script>
+</body>
+</html>
